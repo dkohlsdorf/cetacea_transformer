@@ -3,6 +3,8 @@ import sys
 from lib_cetacea.audio import  *
 from lib_cetacea.parameters import *
 from lib_cetacea.patches import *
+from lib_cetacea.positional_embedding import *
+from lib_cetacea.attention_layers import *
 
 
 def header():
@@ -11,7 +13,7 @@ def header():
     Cetacea - A Audio Dolphin Transformer
 
     ./train.py train [supervised|unsupervised] [l1|l2|l2_label] WAV CSV 
-    ./train.py plot [patches|reconstruct] wav output
+    ./train.py plot [patches|reconstruct|positional] wav output
     
 
     by Daniel Kohlsdorf
@@ -41,21 +43,36 @@ def plot(inp, outp, mode = 'patches'):
         x = raw(inp)
         s = spectrogram(x, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP)
         patch_extractor = Patches(patch_size=PATCHES)
-
         w, h = s.shape
         patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
         plot_grid(outp, patch_tensor, w, h, PATCHES)
     if mode == 'reconstruct':
         x = raw(inp)
         s = spectrogram(x, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP)
-        w, h = s.shape
-        
+        w, h = s.shape        
         patch_extractor = Patches(patch_size=PATCHES)
         patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
         reconstruction = reconstruct_from_patch(patch_tensor, PATCHES, w)[:, :, 0]
         plt.imshow(reconstruction)
         plt.axis('off')
         plt.savefig(outp)
+    if mode == 'positional':
+        x = raw(inp)
+        s = spectrogram(x, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP)
+        w, h = s.shape
+        patch_extractor = Patches(patch_size=PATCHES)
+        patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
+        l, d = patch_tensor.shape[1:3]        
+        positional = PositionalEmbedding(d)        
+        pos_encoded = positional(patch_tensor)
+        plt.figure(figsize=((2 * d)//10, l // 10))
+        plt.subplot(1, 2, 1)
+        plt.imshow(pos_encoded[0])
+        plt.axis('off')
+        plt.subplot(1, 2, 2)
+        plt.imshow(positional.pos_encoding[:l, :])
+        plt.axis('off')
+        plt.savefig(outp, bbox_inches='tight')
         
     
 if __name__ == "__main__":
