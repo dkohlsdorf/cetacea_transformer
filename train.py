@@ -50,7 +50,7 @@ def plot(inp, outp, mode = 'patches'):
         s = spectrogram(x, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP)
         w, h = s.shape        
         patch_extractor = Patches(patch_size=PATCHES)
-        patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
+        patch_tensor = patch_extractor(s.reshape(1, w, h, 1))        
         reconstruction = reconstruct_from_patch(patch_tensor, PATCHES, w)[:, :, 0]
         plt.imshow(reconstruction)
         plt.axis('off')
@@ -73,11 +73,12 @@ def plot(inp, outp, mode = 'patches'):
         ) = patch_encoder(patch_tensor)
         
         new_patch = generate_masked_image(patch_tensor[0], unmask_indices[0])
-        print(new_patch.shape, PATCHES, w)
         plt.figure(figsize=(10, 10))
         plt.subplot(1, 2, 1)
+        w, h = new_patch.shape
+        new_patch = new_patch.reshape(1, w, h)
         img = reconstruct_from_patch(new_patch, PATCHES, w)
-        plt.imshow(keras.utils.array_to_img(img))
+        plt.imshow(img)
         plt.subplot(1, 2, 2)
         plt.imshow(s)
         plt.savefig(outp)
