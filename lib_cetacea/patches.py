@@ -43,9 +43,7 @@ def plot_grid(filename, tensor, n_patches_w, n_patches_h, patch_size):
 def reconstruct_from_patch(patch, patch_size, img_w):
      n = img_w // patch_size 
      num_patches = patch[0].shape[0]
-     patch = patch[:, :-(num_patches % n), :]
-     num_patches = patch[0].shape[0]
-     
+     print(patch.shape, n, patch_size, img_w)
      patch = tf.reshape(patch, (num_patches, patch_size, patch_size, 1))
      rows = tf.split(patch, n, axis=0)
      rows = [tf.concat(tf.unstack(x), axis=1) for x in rows]
