@@ -3,9 +3,8 @@ import sys
 from lib_cetacea.audio import  *
 from lib_cetacea.parameters import *
 from lib_cetacea.patches import *
-from lib_cetacea.positional_embedding import *
 from lib_cetacea.attention_layers import *
-
+from lib_cetacea.masking import * 
 
 def header():
     return """
@@ -13,7 +12,7 @@ def header():
     Cetacea - A Audio Dolphin Transformer
 
     ./train.py train [supervised|unsupervised] [l1|l2|l2_label] WAV CSV 
-    ./train.py plot [patches|reconstruct] wav output
+    ./train.py plot [patches|reconstruct|masked] wav output
     
 
     by Daniel Kohlsdorf
@@ -56,6 +55,34 @@ def plot(inp, outp, mode = 'patches'):
         plt.imshow(reconstruction)
         plt.axis('off')
         plt.savefig(outp)
+    if mode == 'masked':
+        x = raw(inp)
+        s = spectrogram(x, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP)
+        w, h = s.shape
+        
+        patch_extractor = Patches(patch_size=PATCHES)        
+        patch_encoder = MaskedPatchEncoder(PATCHES, 0.75)
+        
+        patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
+        (
+            unmasked_embeddings,
+            masked_embeddings,
+            unmasked_positions,
+            mask_indices,
+            unmask_indices,
+        ) = patch_encoder(patch_tensor)
+        
+        new_patch = generate_masked_image(patch_tensor[0], unmask_indices[0])
+        print(new_patch.shape, PATCHES, w)
+        plt.figure(figsize=(10, 10))
+        plt.subplot(1, 2, 1)
+        img = reconstruct_from_patch(new_patch, PATCHES, w)
+        plt.imshow(keras.utils.array_to_img(img))
+        plt.subplot(1, 2, 2)
+        plt.imshow(s)
+        plt.savefig(outp)
+
+        
 
         
 if __name__ == "__main__":

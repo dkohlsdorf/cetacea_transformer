@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-from tf.keras.layers import * 
-from lin_cetacea.patch_embeddings import *
+from tensorflow.keras.layers import * 
+from lib_cetacea.patches import *
 
 
 def rand_idx(batch_size, n_patches, mask_percentage):
@@ -11,12 +11,21 @@ def rand_idx(batch_size, n_patches, mask_percentage):
     )
     mask_indices = rand_indices[:, : num_mask]
     unmask_indices = rand_indices[:, num_mask :]
-    return mask_indices, unmask_indices
+    return mask_indices, unmask_indices, num_mask
+
+
+def generate_masked_image(patch, unmask_index):
+    new_patch = np.zeros_like(patch)    
+    count = 0
+    for i in range(unmask_index.shape[0]):
+        new_patch[unmask_index[i]] = patch[unmask_index[i]]
+    return new_patch
 
 
 class MaskedPatchEncoder(Layer):
 
-    def __init__(self, patch_size, mask_percentage, max_len=10000):
+    def __init__(self, patch_size, mask_percentage, max_len=10000, **kwargs):
+        super().__init__(**kwargs)
         self.mask_percentage = mask_percentage
         self.mask_token = tf.Variable(
             tf.random.normal([1, patch_size * patch_size]), trainable=True
@@ -27,8 +36,8 @@ class MaskedPatchEncoder(Layer):
 
         
     def call(self, x):
-        batch_size, n_patches, dim = x.shape()
-        mask_indices, unmask_indices = rand_idx(batch_size, n_patches, self.mask_percentage)
+        batch_size, n_patches, dim = x.shape
+        mask_indices, unmask_indices, num_mask = rand_idx(batch_size, n_patches, self.mask_percentage)
         
         positions = tf.range(start=0, limit=n_patches, delta=1)        
         pos_embeddings = self.position_embedding(positions[tf.newaxis, ...])
@@ -48,9 +57,9 @@ class MaskedPatchEncoder(Layer):
         )
         unmasked_embeddings = unmasked_embeddings + unmasked_positions
 
-        masked_embeddings = tf.repeat(self.mask_token, repeats=self.num_mask, axis=0)
+        masked_embeddings = tf.repeat(self.mask_token, repeats=num_mask, axis=0)
         masked_embeddings = tf.repeat(
-            masked_embedding[tf.newaxis, ...], repeats=batch_size, axis=0
+            masked_embeddings[tf.newaxis, ...], repeats=batch_size, axis=0
         )
         masked_embeddings = masked_embeddings + masked_positions
         
