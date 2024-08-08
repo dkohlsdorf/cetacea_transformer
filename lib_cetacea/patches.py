@@ -22,7 +22,6 @@ class Patches(tf.keras.layers.Layer):
 
 def plot_grid(filename, tensor, n_patches_w, n_patches_h, patch_size):
      n_patches_w, n_patches_h = n_patches_w // patch_size, n_patches_h // patch_size
-     print(n_patches_w, n_patches_h)
 
      tensor = tensor[0]
      vmin = np.min(tensor)
@@ -43,7 +42,6 @@ def plot_grid(filename, tensor, n_patches_w, n_patches_h, patch_size):
 def reconstruct_from_patch(patch, patch_size, img_w):
      n = img_w // patch_size 
      num_patches = patch[0].shape[0]
-     print(patch.shape, n, patch_size, img_w)
      patch = tf.reshape(patch, (num_patches, patch_size, patch_size, 1))
      rows = tf.split(patch, n, axis=0)
      rows = [tf.concat(tf.unstack(x), axis=1) for x in rows]

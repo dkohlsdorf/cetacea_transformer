@@ -78,11 +78,9 @@ def plot(inp, outp, mode = 'patches'):
         l, d = new_patch.shape
         new_patch = new_patch.reshape(1, l, d)
         img = reconstruct_from_patch(new_patch, PATCHES, w)[:, :, 0]
-        print(img.shape)
         plt.imshow(img)
         plt.subplot(1, 2, 2)
         img = reconstruct_from_patch(patch_tensor, PATCHES, w)[:, :, 0]
-        print(img.shape)
         plt.imshow(img)
         plt.savefig(outp)
 

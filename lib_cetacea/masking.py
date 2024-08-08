@@ -16,7 +16,6 @@ def rand_idx(batch_size, n_patches, mask_percentage):
 
 def generate_masked_image(patch, unmask_index):
     new_patch = np.zeros_like(patch)    
-    print(unmask_index.shape, new_patch.shape)
     for i in unmask_index:
         new_patch[i] = patch[i]
     return new_patch
