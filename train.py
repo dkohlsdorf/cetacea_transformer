@@ -61,7 +61,7 @@ def plot(inp, outp, mode = 'patches'):
         w, h = s.shape
         
         patch_extractor = Patches(patch_size=PATCHES)        
-        patch_encoder = MaskedPatchEncoder(PATCHES, 0.75)
+        patch_encoder = MaskedPatchEncoder(PATCHES, 0.5)
         
         patch_tensor = patch_extractor(s.reshape(1, w, h, 1))
         (
