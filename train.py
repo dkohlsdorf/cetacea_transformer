@@ -74,7 +74,7 @@ def plot(inp, outp, mode = 'patches'):
         
         new_patch = generate_masked_image(patch_tensor[0], unmask_indices[0])
 
-        
+        plt.figure(figsize=(h//10, w//10))
         plt.subplot(1, 2, 1)
         l, d = new_patch.shape
         new_patch = new_patch.reshape(1, l, d)
