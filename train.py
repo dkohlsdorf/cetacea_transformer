@@ -86,11 +86,8 @@ def plot(inp, outp, mode = 'patches'):
         img = reconstruct_from_patch(patch_tensor, PATCHES, w)[:, :, 0]
         plt.imshow(img)
         plt.axis('off')
-        plt.savefig(outp)
-        plt.savefig(outp)
-
+        plt.savefig(outp, bbox_inches='tight')
         
-
         
 if __name__ == "__main__":
     print(header())
