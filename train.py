@@ -4,7 +4,9 @@ from lib_cetacea.audio import  *
 from lib_cetacea.parameters import *
 from lib_cetacea.patches import *
 from lib_cetacea.attention_layers import *
-from lib_cetacea.masking import * 
+from lib_cetacea.masking import *
+from lib_cetacea.models import *
+
 
 def header():
     return """
@@ -32,7 +34,11 @@ def parameters(cmd, supervision, level, wav, csv):
 
 
 def train(supervision, level, wav, csv):
+    e = encoder(10, 10, 3, 4) 
+    e.summary()
     if supervision == 'supervised' and level == 'l1':
+        c = sequence_classifier(e, 10, 10, 3)
+        c.summary()
         print(f"... process labeled l1: {wav} {csv}")
         x, _, y, _ = dataset_supervised_windows(csv, wav, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP, RAW_AUDIO, LABELS)
 
@@ -93,7 +99,8 @@ if __name__ == "__main__":
     print(header())
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
-        if cmd == 'train' and len(sys.argv) == 5:
+        print(len(sys.argv))
+        if cmd == 'train' and len(sys.argv) == 6:
             supervision, level, wav_file, csv_file = sys.argv[2:6]
             print(parameters(cmd, supervision, level, wav_file, csv_file))
             train(supervision, level, wav_file, csv_file)
