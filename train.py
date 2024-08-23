@@ -34,14 +34,24 @@ def parameters(cmd, supervision, level, wav, csv):
 
 
 def train(supervision, level, wav, csv):
-    e = encoder(10, 10, 3, 4) 
+    e = encoder(int(np.ceil(T / PATCHES)) * int(np.ceil(D / PATCHES)), PATCHES * PATCHES, 3, 4) 
     e.summary()
     if supervision == 'supervised' and level == 'l1':
-        c = sequence_classifier(e, 10, 10, 3)
+        c = sequence_classifier(e, T, D, PATCHES, len(LABELS))
         c.summary()
-        print(f"... process labeled l1: {wav} {csv}")
-        x, _, y, _ = dataset_supervised_windows(csv, wav, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP, RAW_AUDIO, LABELS)
+        c.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+            loss=tf.keras.losses.CategoricalCrossentropy(),
+            metrics=[
+                tf.keras.metrics.Accuracy()                
+            ],
+        )
 
+        print(f"... process labeled l1: {wav} {csv}")    
+        x, _, y, _ = dataset_supervised_windows(
+            csv, wav, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP, RAW_AUDIO, LABELS)
+        c.fit(x, y, batch_size=100, epochs=10, validation_split=0.2)
+        
 
 def plot(inp, outp, mode = 'patches'):
     if mode == 'patches':
@@ -99,7 +109,6 @@ if __name__ == "__main__":
     print(header())
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
-        print(len(sys.argv))
         if cmd == 'train' and len(sys.argv) == 6:
             supervision, level, wav_file, csv_file = sys.argv[2:6]
             print(parameters(cmd, supervision, level, wav_file, csv_file))
