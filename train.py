@@ -50,6 +50,8 @@ def train(supervision, level, wav, csv):
         print(f"... process labeled l1: {wav} {csv}")    
         x, _, y, _ = dataset_supervised_windows(
             csv, wav, FFT_LO, FFT_HI, FFT_WIN, FFT_STEP, RAW_AUDIO, LABELS)
+        x = np.array(x)
+        y = np.array(y)
         c.fit(x, y, batch_size=100, epochs=10, validation_split=0.2)
         
 
